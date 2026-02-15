@@ -7,5 +7,6 @@ export const countries : Country[] = [
     { code: 'CO', name: 'Colombia' },
     { code: 'CR', name: 'Costa Rica' },
     { code: 'ES', name: 'España' },
-    { code: 'PE', name: 'Perú' }
+    { code: 'PE', name: 'Perú' },
+    { code: 'VE', name: 'Venezuela' },
   ]
