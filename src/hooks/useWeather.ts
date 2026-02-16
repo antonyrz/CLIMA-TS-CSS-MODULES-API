@@ -1,5 +1,8 @@
 import axios from 'axios';
 import { z } from 'zod';
+import { useState } from 'react';
+// import {object, string, number, parse} from 'valibot';
+// import type { InferOutput } from 'valibot';
 import type { SearchType } from '../types';
 
 //? TYPE GUARD OR ASSERTION FUNCTION TO CHECK IF THE RESPONSE FROM THE API MATCHES THE WEATHER TYPE
@@ -15,7 +18,7 @@ import type { SearchType } from '../types';
 //     )
 // }
 
-//Zod schema to validate the response from the API
+// ? Zod schema to validate the response from the API
 
 const Weather = z.object({
     name: z.string(),
@@ -26,9 +29,31 @@ const Weather = z.object({
     })
 })
 
-type Weather = z.infer<typeof Weather>
+export type Weather = z.infer<typeof Weather>
+
+// // ? VALIBOT
+
+// const WeatherSchema = object({
+//     name: string(),
+//     main: object({
+//         temp: number(),
+//         temp_min: number(),
+//         temp_max: number(),
+//     })
+// })
+
+// type Weather = InferOutput<typeof WeatherSchema>
 
 export default function useWeather() {
+
+    const [weather, setWeather] = useState<Weather>({
+        name: '',
+        main: {
+            temp: 0,
+            temp_min: 0,
+            temp_max: 0,
+        }
+    });
 
 
     const fetchWeather = async(search: SearchType) => {
@@ -41,13 +66,17 @@ export default function useWeather() {
             const { data } = await axios(geoUrl);
             const {lat, lon} = data[0];
             const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${appId}`;
+            const {data: weatherData} = await axios(weatherUrl);
+
+             // VALIBOT
+            // const result = parse(WeatherSchema, weatherData);
 
             // ZOD
-            const {data: weatherData} = await axios(weatherUrl);
             const result = Weather.safeParse(weatherData);
-
             
-            
+            if(result.success){
+                setWeather(result.data);
+            }
 
         }catch (error) {
             console.log(error);
@@ -55,6 +84,7 @@ export default function useWeather() {
     }
 
   return {
+    weather,
     fetchWeather
   }
 }
